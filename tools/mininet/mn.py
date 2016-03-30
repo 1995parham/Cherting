@@ -12,16 +12,17 @@ from mininet.topo import Topo
 
 
 class DataCenterTopology(Topo):
-    """Data Center topology
+    """
+    Data Center topology
 
-       The topology has a single core switch. There are 2 ** (n - 2)
-       aggregate switches connected into core switch and there are
-       2 ** (n - 1) edge switches connected to hosts and aggregate switch
+    The topology has a single core switch. There are 2 ** (n - 2)
+    aggregate switches connected into core switch and there are
+    2 ** (n - 1) edge switches connected to hosts and aggregate switch
                                     c1
                             a1              a2
                         e1      e2      e3      e4
                     h1      h2      h3      h4      h5
-       """
+    """
 
     def build(self, n=2):
         core = self.addSwitch("core")
