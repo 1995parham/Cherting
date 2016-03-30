@@ -10,7 +10,7 @@
 */
 /**
  * @author Parham Alvani
-*/
+ */
 /*
  * Copyright 2014 Open Networking Laboratory
  *
@@ -45,22 +45,23 @@ import org.slf4j.LoggerFactory;
  * SDVPN application component.
  */
 @Component(immediate = true)
-public class AppComponent {
+public class Cherting {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected HostService hostService;
+	private HostService hostService;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected PacketService packetService;
+	private PacketService packetService;
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	protected ApplicationService applicationService;
+	private ApplicationService applicationService;
 
 	@Activate
 	protected void activate() {
 		ApplicationId chertId = applicationService.getId("home.parham.cherting");
+
 		L2SwitchingHandler handler = new L2SwitchingHandler(hostService, packetService);
 
 		/*
