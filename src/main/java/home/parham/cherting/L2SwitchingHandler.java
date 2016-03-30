@@ -72,8 +72,8 @@ public class L2SwitchingHandler implements PacketProcessor {
 		}
 	}
 
-	/*
-	 * Forward packet into destination switch directly :)) how fun
+	/**
+	 * Forward packet into destination switch directly, we put it there ! how fun :)
 	 */
 	private void forwardPacketToDst(PacketContext context, Host dst) {
 		TrafficTreatment treatment = DefaultTrafficTreatment.builder().setOutput(dst.location().port()).build();
@@ -84,14 +84,14 @@ public class L2SwitchingHandler implements PacketProcessor {
 	}
 
 
-	/*
+	/**
 	 * Floods the specified packet if permissible.
 	 */
 	private void flood(PacketContext context) {
 		packetOut(context, PortNumber.FLOOD);
 	}
 
-	/*
+	/**
 	 * Sends a packet out the specified port.
 	 */
 	private void packetOut(PacketContext context, PortNumber portNumber) {
