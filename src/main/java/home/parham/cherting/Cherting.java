@@ -30,6 +30,7 @@ import org.onlab.packet.Ethernet;
 import org.onosproject.app.ApplicationService;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.net.flow.DefaultTrafficSelector;
+import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.flow.TrafficSelector;
 import org.onosproject.net.host.HostService;
 import org.onosproject.net.packet.PacketPriority;
@@ -57,11 +58,14 @@ public class Cherting {
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
     private ApplicationService applicationService;
 
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+    private FlowRuleService flowRuleService;
+
     @Activate
     protected void activate() {
         ApplicationId chertId = applicationService.getId("home.parham.cherting");
 
-        ChertHandler handler = new ChertHandler(hostService, packetService);
+        ChertHandler handler = new ChertHandler(chertId, hostService, packetService, flowRuleService);
 
 		/*
          * Adds the specified processor to the list of packet processors.
@@ -75,7 +79,7 @@ public class Cherting {
         TrafficSelector.Builder selector = DefaultTrafficSelector.builder();
         selector.matchEthType(Ethernet.TYPE_IPV4);
         /*
-		 * Priorities available to applications for requests for packets from the data plane.
+         * Priorities available to applications for requests for packets from the data plane.
 		 * [] CONTROL: High priority for control traffic.
 		 * [] REACTIVE: Low priority for reactive applications.
 		 */
