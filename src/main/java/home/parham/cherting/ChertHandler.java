@@ -62,10 +62,7 @@ public class ChertHandler implements PacketProcessor {
         Host dst = hostService.getHost(dstId);
         if (dst == null) {
             flood(context);
-            return;
-        }
-
-        if (dst.vlan().toShort() == ethPkt.getVlanID()) {
+        } else {
             forwardPacketToDst(context, dst);
         }
     }
