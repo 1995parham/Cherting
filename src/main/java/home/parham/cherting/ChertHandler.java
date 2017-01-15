@@ -23,6 +23,8 @@ import org.onosproject.net.flow.DefaultTrafficSelector;
 import org.onosproject.net.flow.DefaultTrafficTreatment;
 import org.onosproject.net.flow.FlowId;
 import org.onosproject.net.flow.FlowRule;
+import org.onosproject.net.flow.FlowRuleEvent;
+import org.onosproject.net.flow.FlowRuleListener;
 import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.flow.TrafficSelector;
 import org.onosproject.net.flow.TrafficTreatment;
@@ -31,7 +33,7 @@ import org.onosproject.net.packet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ChertHandler implements PacketProcessor {
+public class ChertHandler implements PacketProcessor, FlowRuleListener {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private PacketService packetService;
@@ -134,4 +136,16 @@ public class ChertHandler implements PacketProcessor {
         context.send();
     }
 
+    @Override
+    public void event(FlowRuleEvent flowRuleEvent) {
+        if (flowRuleEvent.type() != FlowRuleEvent.Type.RULE_ADDED)
+            return;
+
+        /* Record flow addition time */
+        long t2 = flowRuleEvent.time();
+
+        long t1 = this.flowTimeStamps.get(flowRuleEvent.subject().id());
+
+        log.info("$ %ld $\n", t2 - t1);
+    }
 }
