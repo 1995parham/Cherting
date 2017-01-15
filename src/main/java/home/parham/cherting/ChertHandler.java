@@ -10,6 +10,8 @@
 */
 package home.parham.cherting;
 
+import java.util.HashMap;
+
 import org.onlab.packet.Ethernet;
 import org.onlab.packet.MacAddress;
 import org.onosproject.core.ApplicationId;
@@ -19,6 +21,7 @@ import org.onosproject.net.PortNumber;
 import org.onosproject.net.flow.DefaultFlowRule;
 import org.onosproject.net.flow.DefaultTrafficSelector;
 import org.onosproject.net.flow.DefaultTrafficTreatment;
+import org.onosproject.net.flow.FlowId;
 import org.onosproject.net.flow.FlowRule;
 import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.flow.TrafficSelector;
@@ -36,15 +39,21 @@ public class ChertHandler implements PacketProcessor {
     private FlowRuleService flowRuleService;
     private ApplicationId id;
 
+    private HashMap<FlowId, Long> flowTimeStamps;
+
     public ChertHandler(ApplicationId id, HostService hostService, PacketService packetService, FlowRuleService flowRuleService) {
         this.id = id;
         this.hostService = hostService;
         this.packetService = packetService;
         this.flowRuleService = flowRuleService;
+        this.flowTimeStamps = new HashMap<>();
     }
 
     @Override
     public void process(PacketContext context) {
+        /* Record packet in time */
+        long t = context.time();
+
         /*
          * Stop processing if the packet has been handled, since we
 		 * can't do any more to it.
@@ -81,7 +90,9 @@ public class ChertHandler implements PacketProcessor {
         tb.setOutput(pkt.receivedFrom().port());
         fb.withTreatment(tb.build());
         /* Flow applying */
-        this.flowRuleService.applyFlowRules(fb.build());
+        FlowRule f = fb.build();
+        this.flowTimeStamps.put(f.id(), t);
+        this.flowRuleService.applyFlowRules(f);
 
         HostId dstId = HostId.hostId(ethPkt.getDestinationMAC());
 
