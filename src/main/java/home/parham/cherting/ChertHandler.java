@@ -12,10 +12,16 @@ package home.parham.cherting;
 
 import org.onlab.packet.Ethernet;
 import org.onlab.packet.MacAddress;
+import org.onosproject.core.ApplicationId;
 import org.onosproject.net.Host;
 import org.onosproject.net.HostId;
 import org.onosproject.net.PortNumber;
+import org.onosproject.net.flow.DefaultFlowRule;
+import org.onosproject.net.flow.DefaultTrafficSelector;
 import org.onosproject.net.flow.DefaultTrafficTreatment;
+import org.onosproject.net.flow.FlowRule;
+import org.onosproject.net.flow.FlowRuleService;
+import org.onosproject.net.flow.TrafficSelector;
 import org.onosproject.net.flow.TrafficTreatment;
 import org.onosproject.net.host.HostService;
 import org.onosproject.net.packet.*;
@@ -24,12 +30,17 @@ import org.slf4j.LoggerFactory;
 
 public class ChertHandler implements PacketProcessor {
     private final Logger log = LoggerFactory.getLogger(getClass());
+
     private PacketService packetService;
     private HostService hostService;
+    private FlowRuleService flowRuleService;
+    private ApplicationId id;
 
-    public ChertHandler(HostService hostService, PacketService packetService) {
+    public ChertHandler(ApplicationId id, HostService hostService, PacketService packetService, FlowRuleService flowRuleService) {
+        this.id = id;
         this.hostService = hostService;
         this.packetService = packetService;
+        this.flowRuleService = flowRuleService;
     }
 
     @Override
@@ -54,10 +65,28 @@ public class ChertHandler implements PacketProcessor {
             return;
         }
 
+        /*
+         * Let's build the rule for it's source.
+         */
+        FlowRule.Builder fb = DefaultFlowRule.builder();
+        /* General flow information */
+        fb.forDevice(pkt.receivedFrom().deviceId());
+        fb.fromApp(this.id);
+        /* Flow selection */
+        TrafficSelector.Builder sb = DefaultTrafficSelector.builder();
+        sb.matchEthDst(ethPkt.getSourceMAC());
+        fb.withSelector(sb.build());
+        /* Flow treatment */
+        TrafficTreatment.Builder tb = DefaultTrafficTreatment.builder();
+        tb.setOutput(pkt.receivedFrom().port());
+        fb.withTreatment(tb.build());
+        /* Flow applying */
+        this.flowRuleService.applyFlowRules(fb.build());
+
         HostId dstId = HostId.hostId(ethPkt.getDestinationMAC());
 
 		/*
-		 * Do we know who this is for? If not, flood and bail.
+         * Do we know who this is for? If not, flood and bail.
 		 */
         Host dst = hostService.getHost(dstId);
         if (dst == null) {
