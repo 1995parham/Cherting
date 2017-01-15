@@ -8,9 +8,6 @@
  * [] Created By : Parham Alvani (parham.alvani@gmail.com)
  * =======================================
 */
-/**
- * @author Parham Alvani
- */
 /*
  * Copyright 2014 Open Networking Laboratory
  *
@@ -41,52 +38,55 @@ import org.onosproject.net.packet.PacketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 /**
- * SDVPN application component.
+ * Cherting application component.
  */
 @Component(immediate = true)
 public class Cherting {
 
-	private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
-	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	private HostService hostService;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+    private HostService hostService;
 
-	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	private PacketService packetService;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+    private PacketService packetService;
 
-	@Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-	private ApplicationService applicationService;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+    private ApplicationService applicationService;
 
-	@Activate
-	protected void activate() {
-		ApplicationId chertId = applicationService.getId("home.parham.cherting");
+    @Activate
+    protected void activate() {
+        ApplicationId chertId = applicationService.getId("home.parham.cherting");
 
-		L2SwitchingHandler handler = new L2SwitchingHandler(hostService, packetService);
+        ChertHandler handler = new ChertHandler(hostService, packetService);
 
 		/*
-		 * Adds the specified processor to the list of packet processors.
+         * Adds the specified processor to the list of packet processors.
 		 * It will be added into the list in the order of priority.
 		 * The higher numbers will be processing the packets after the lower numbers.
 		 * Parameters:
 		 * processor - processor to be added
 		 * priority - priority in the reverse natural order
 		 */
-		packetService.addProcessor(handler, PacketProcessor.director(2));
-		TrafficSelector.Builder selector = DefaultTrafficSelector.builder();
-		selector.matchEthType(Ethernet.TYPE_IPV4);
-		/*
+        packetService.addProcessor(handler, PacketProcessor.director(2));
+        TrafficSelector.Builder selector = DefaultTrafficSelector.builder();
+        selector.matchEthType(Ethernet.TYPE_IPV4);
+        /*
 		 * Priorities available to applications for requests for packets from the data plane.
 		 * [] CONTROL: High priority for control traffic.
 		 * [] REACTIVE: Low priority for reactive applications.
 		 */
-		packetService.requestPackets(selector.build(), PacketPriority.REACTIVE, chertId);
+        packetService.requestPackets(selector.build(), PacketPriority.REACTIVE, chertId,
+                Optional.empty());
 
-		log.info("Started");
-	}
+        log.info("Started");
+    }
 
-	@Deactivate
-	protected void deactivate() {
-		log.info("Stopped");
-	}
+    @Deactivate
+    protected void deactivate() {
+        log.info("Stopped");
+    }
 }
