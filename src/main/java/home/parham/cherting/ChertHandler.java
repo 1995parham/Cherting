@@ -52,9 +52,10 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
 
     @Override
     public void process(PacketContext context) {
-        /* Record packet in time */
-        long tc = context.time();
-        long t = System.nanoTime();
+        /* Record packet in time (Waiting time) */
+        long tw = context.time();
+        /* Record process starting time (processing time) */
+        long tp = System.nanoTime();
 
         /*
          * Stop processing if the packet has been handled, since we
@@ -95,10 +96,11 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
         fb.withTreatment(tb.build());
         /* Flow applying */
         FlowRule f = fb.build();
-        this.flowTimeStamps.put(f.id(), t);
+        this.flowTimeStamps.put(f.id(), tw);
         this.flowRuleService.applyFlowRules(f);
 
-        long diff = System.nanoTime() - t;
+        /* Time measurements */
+        long diff = System.nanoTime() - tp;
         if (diff > 1000000) {
             diff = (long) this.averageProcessingTime;
         }
@@ -106,7 +108,7 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
         this.averageProcessingTime /= (this.n + 1);
         this.n++;
         log.info("% RSTime: " + this.averageProcessingTime + " % n: " + (this.n - 1) + "\n");
-        log.info("$ W Time: " + (System.currentTimeMillis() - tc) + " $ n: " + (this.n - 1) + "\n");
+        log.info("$ W Time: " + (System.currentTimeMillis() - tw) + " $ n: " + (this.n - 1) + "\n");
     }
 
 
