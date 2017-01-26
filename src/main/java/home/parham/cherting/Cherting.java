@@ -86,6 +86,8 @@ public class Cherting {
         packetService.requestPackets(selector.build(), PacketPriority.REACTIVE, chertId,
                 Optional.empty());
 
+	flowRuleService.addListener(handler);
+
         log.info("Started");
     }
 
