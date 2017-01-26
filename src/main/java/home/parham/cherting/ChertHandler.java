@@ -10,9 +10,6 @@
 */
 package home.parham.cherting;
 
-import java.util.HashMap;
-import java.lang.System;
-
 import org.onlab.packet.Ethernet;
 import org.onlab.packet.MacAddress;
 import org.onosproject.core.ApplicationId;
@@ -27,9 +24,13 @@ import org.onosproject.net.flow.FlowRuleListener;
 import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.flow.TrafficSelector;
 import org.onosproject.net.flow.TrafficTreatment;
-import org.onosproject.net.packet.*;
+import org.onosproject.net.packet.InboundPacket;
+import org.onosproject.net.packet.PacketContext;
+import org.onosproject.net.packet.PacketProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
 
 public class ChertHandler implements PacketProcessor, FlowRuleListener {
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -45,15 +46,15 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
         this.id = id;
         this.flowRuleService = flowRuleService;
         this.flowTimeStamps = new HashMap<>();
-	this.averageProcessingTime = 0;
-	this.n = 0;
+        this.averageProcessingTime = 0;
+        this.n = 0;
     }
 
     @Override
     public void process(PacketContext context) {
         /* Record packet in time */
         long tc = context.time();
-	long t = System.nanoTime();
+        long t = System.nanoTime();
 
         /*
          * Stop processing if the packet has been handled, since we
@@ -81,8 +82,8 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
         FlowRule.Builder fb = DefaultFlowRule.builder();
         /* General flow information */
         fb.forDevice(pkt.receivedFrom().deviceId());
-	fb.makePermanent();
-	fb.withPriority(10);
+        fb.makePermanent();
+        fb.withPriority(10);
         fb.fromApp(this.id);
         /* Flow selection */
         TrafficSelector.Builder sb = DefaultTrafficSelector.builder();
@@ -97,15 +98,15 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
         this.flowTimeStamps.put(f.id(), t);
         this.flowRuleService.applyFlowRules(f);
 
-	long diff = System.nanoTime() - t;
-	if (diff > 1000000) {
-		diff = (long) this.averageProcessingTime;
-	}
-	this.averageProcessingTime = this.n * this.averageProcessingTime + diff;
-	this.averageProcessingTime /= (this.n + 1);
-	this.n++;
-	log.info("% RSTime: " + this.averageProcessingTime + " % n: " + (this.n - 1) + "\n");
-	log.info("$ W Time: " + (System.currentTimeMillis() - tc) + " $ n: " + (this.n - 1) + "\n");
+        long diff = System.nanoTime() - t;
+        if (diff > 1000000) {
+            diff = (long) this.averageProcessingTime;
+        }
+        this.averageProcessingTime = this.n * this.averageProcessingTime + diff;
+        this.averageProcessingTime /= (this.n + 1);
+        this.n++;
+        log.info("% RSTime: " + this.averageProcessingTime + " % n: " + (this.n - 1) + "\n");
+        log.info("$ W Time: " + (System.currentTimeMillis() - tc) + " $ n: " + (this.n - 1) + "\n");
     }
 
 
