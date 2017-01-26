@@ -36,17 +36,13 @@ import org.slf4j.LoggerFactory;
 public class ChertHandler implements PacketProcessor, FlowRuleListener {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private PacketService packetService;
-    private HostService hostService;
     private FlowRuleService flowRuleService;
     private ApplicationId id;
 
     private HashMap<FlowId, Long> flowTimeStamps;
 
-    public ChertHandler(ApplicationId id, HostService hostService, PacketService packetService, FlowRuleService flowRuleService) {
+    public ChertHandler(ApplicationId id, FlowRuleService flowRuleService) {
         this.id = id;
-        this.hostService = hostService;
-        this.packetService = packetService;
         this.flowRuleService = flowRuleService;
         this.flowTimeStamps = new HashMap<>();
     }
@@ -95,29 +91,6 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
         FlowRule f = fb.build();
         this.flowTimeStamps.put(f.id(), t);
         this.flowRuleService.applyFlowRules(f);
-
-        HostId dstId = HostId.hostId(ethPkt.getDestinationMAC());
-
-		/*
-         * Do we know who this is for? If not, flood and bail.
-		 */
-        Host dst = hostService.getHost(dstId);
-        if (dst == null) {
-            flood(context);
-        } else {
-            forwardPacketToDst(context, dst);
-        }
-    }
-
-    /**
-     * Forward packet into destination switch directly, we put it there ! how fun :)
-     */
-    private void forwardPacketToDst(PacketContext context, Host dst) {
-        TrafficTreatment treatment = DefaultTrafficTreatment.builder().setOutput(dst.location().port()).build();
-        OutboundPacket packet = new DefaultOutboundPacket(dst.location().deviceId(),
-                treatment, context.inPacket().unparsed());
-        packetService.emit(packet);
-        log.info("sending packet: {}", packet);
     }
 
 

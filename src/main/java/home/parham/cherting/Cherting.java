@@ -65,7 +65,7 @@ public class Cherting {
     protected void activate() {
         ApplicationId chertId = applicationService.getId("home.parham.cherting");
 
-        ChertHandler handler = new ChertHandler(chertId, hostService, packetService, flowRuleService);
+        ChertHandler handler = new ChertHandler(chertId, flowRuleService);
 
 		/*
          * Adds the specified processor to the list of packet processors.
