@@ -25,7 +25,11 @@
  */
 package home.parham.cherting;
 
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.onlab.packet.Ethernet;
 import org.onosproject.app.ApplicationService;
 import org.onosproject.core.ApplicationId;
@@ -36,6 +40,7 @@ import org.onosproject.net.host.HostService;
 import org.onosproject.net.packet.PacketPriority;
 import org.onosproject.net.packet.PacketProcessor;
 import org.onosproject.net.packet.PacketService;
+import org.onosproject.net.topology.TopologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,11 +66,15 @@ public class Cherting {
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
     private FlowRuleService flowRuleService;
 
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+    private TopologyService topologyService;
+
     @Activate
     protected void activate() {
         ApplicationId chertId = applicationService.getId("home.parham.cherting");
 
-        ChertHandler handler = new ChertHandler(chertId, flowRuleService);
+        ChertHandler handler = new ChertHandler(chertId, flowRuleService, topologyService,
+                hostService);
 
 		/*
          * Adds the specified processor to the list of packet processors.
@@ -86,7 +95,7 @@ public class Cherting {
         packetService.requestPackets(selector.build(), PacketPriority.REACTIVE, chertId,
                 Optional.empty());
 
-	flowRuleService.addListener(handler);
+        flowRuleService.addListener(handler);
 
         log.info("Started");
     }
