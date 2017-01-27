@@ -119,6 +119,7 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
 
         /* Time measurements */
         long diff = System.nanoTime() - tp;
+        /* Ignores out of range response times */
         if (diff > 1000000) {
             diff = (long) this.averageProcessingTime;
         }
