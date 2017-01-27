@@ -125,8 +125,8 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
         this.averageProcessingTime = this.n * this.averageProcessingTime + diff;
         this.averageProcessingTime /= (this.n + 1);
         this.n++;
-        log.info("% RSTime: " + this.averageProcessingTime + " % n: " + (this.n - 1) + "\n");
-        log.info("$ W Time: " + (System.currentTimeMillis() - tw) + " $ n: " + (this.n - 1) + "\n");
+        log.info("% RSTime: " + this.averageProcessingTime + " % n: " + (this.n - 1));
+        log.info("$ W Time: " + (System.currentTimeMillis() - tw) + " $ n: " + (this.n - 1));
     }
 
 
@@ -153,8 +153,11 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
         /* Record flow addition time */
         long t2 = flowRuleEvent.time();
 
-        long t1 = this.flowTimeStamps.get(flowRuleEvent.subject().id());
+        long t1 = t2;
 
-        //log.info("$ " + (t2 - t1) + " $\n");
+        if (this.flowTimeStamps.containsKey(flowRuleEvent.subject().id()))
+            t1 = this.flowTimeStamps.get(flowRuleEvent.subject().id());
+
+        log.info("$ " + (t2 - t1) + " $");
     }
 }
