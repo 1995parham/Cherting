@@ -46,6 +46,7 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
 
     private HashMap<FlowId, Long> flowTimeStamps;
     private double averageProcessingTime;
+    private double averageWaitingTime;
     private int n;
 
     public ChertHandler(ApplicationId id, FlowRuleService flowRuleService,
@@ -56,6 +57,7 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
         this.hostService = hostService;
         this.flowTimeStamps = new HashMap<>();
         this.averageProcessingTime = 0;
+        this.averageWaitingTime = 0;
         this.n = 0;
     }
 
@@ -124,10 +126,12 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
             diff = (long) this.averageProcessingTime;
         }
         this.averageProcessingTime = this.n * this.averageProcessingTime + diff;
+        this.averageWaitingTime = this.n * this.averageWaitingTime + System.currentTimeMillis() - tw;
         this.averageProcessingTime /= (this.n + 1);
+        this.averageWaitingTime /= (this.n + 1);
         this.n++;
         log.info("% RSTime: " + this.averageProcessingTime + " % n: " + (this.n - 1));
-        log.info("$ W Time: " + (System.currentTimeMillis() - tw) + " $ n: " + (this.n - 1));
+        log.info("$ W Time: " + this.averageWaitingTime + " $ n: " + (this.n - 1));
     }
 
 
