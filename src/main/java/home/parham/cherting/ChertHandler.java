@@ -77,7 +77,9 @@ public class ChertHandler implements PacketProcessor, FlowRuleListener {
         }
 
         InboundPacket pkt = context.inPacket();
+        long tParsed = System.nanoTime();
         Ethernet ethPkt = pkt.parsed();
+        log.info("* Parse Time: " + (System.nanoTime() - tParsed));
 
         if (ethPkt == null) {
             return;
